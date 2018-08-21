@@ -119,6 +119,7 @@ class MultiCurl
         $curl->setUrl($url, $data);
         $curl->setOpt(CURLOPT_CUSTOMREQUEST, 'GET');
         $curl->setOpt(CURLOPT_HTTPGET, true);
+        $curl->setOpt(CURLOPT_FOLLOWLOCATION, true);
         return $curl;
     }
 
