@@ -6,12 +6,57 @@ final class Parser
 
 	const PAGE_ATTRIBUTE = '?page=';
 
-	private $sourse;
+	private $urls = [];
 
-	private $urls = [
-		'https://hh.ru/search/vacancy?enable_snippets=true&clusters=true&page=0',
-		'https://hh.ru/search/vacancy?enable_snippets=true&clusters=true&page=1',
-	];
+	protected $currentPage;
+
+	private $firstPageNumber = 0;
+
+	private $lastPageNumber = 0;
+
+	public function initUrls():void
+	{
+		for($i = $this->firstPageNumber; $i < $this->lastPageNumber; $i++){
+			array_push($this->urls, self::MASTER_URL.self::PAGE_ATTRIBUTE.$i);
+		}
+	}
+	
+	/**
+	 * @var Getters and Setters
+	 */
+
+	public function getFirstPageNumber():int
+	{
+		return $this->firstPageNumber;
+	}
+
+	public function setFirstPageNumber(int $number):void
+	{
+		$this->firstPageNumber = $number;
+	}
+
+	public function getLastPageNumber():int
+	{
+		return $this->lastPageNumber;
+	}
+
+	public function setLastPageNumber(int $number):void
+	{
+		$this->lastPageNumber = $number;
+	}
+
+	public function getFirstPage():string
+	{
+		$ch = curl_init(self::MASTER_URL);
+
+		self::buildChannel($ch);
+
+		$html = curl_exec($ch);
+
+		curl_close($ch);
+
+		return $html;
+	}
 
 	public function parse()
 	{
@@ -19,14 +64,16 @@ final class Parser
 
 		$handles = [];
 
+		$htmls = [];
+
 		foreach($this->urls as $url){
 
 			$ch = curl_init($url);
-			curl_setopt($ch, CURLOPT_HEADER, false);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+
+			self::buildChannel($ch);
 
 			curl_multi_add_handle($multi, $ch);
+
 			$handles[$url] = $ch;
 		}
 
@@ -43,11 +90,16 @@ final class Parser
 
 		foreach ($handles as $channel) {
 			$html = curl_multi_getcontent($channel);
-			var_dump($html);
+			
+			$this->currentPage = $html;
+
+			array_push($htmls, $html);
 			curl_multi_remove_handle($multi, $channel);
 		}
 
 		curl_multi_close($multi);
+
+		return $htmls;
 	}
 
 	private static function doCurlMultiExec(&$multi, &$active)
@@ -55,5 +107,12 @@ final class Parser
 		do {
 			$mrc = curl_multi_exec($multi, $active);
 		} while ( $mrc == CURLM_CALL_MULTI_PERFORM);
+	}
+
+	private static function buildChannel(&$ch):void
+	{
+		curl_setopt($ch, CURLOPT_HEADER, false);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 	}
 }
