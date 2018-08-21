@@ -2,7 +2,9 @@
 
 require('./Config/Settings.php');
 
-class DB 
+require('./Interfaces/Singleton.php');
+
+final class DB implements Singleton
 {
 	private $connection;
 
@@ -27,7 +29,7 @@ class DB
 
     private function __wakeup()   {  } 
 
-    public static function getInstance():self
+    public static function getInstance()
     { 
         if ( empty(self::$instance) ) {
             self::$instance = new self();
