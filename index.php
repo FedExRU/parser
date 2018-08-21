@@ -35,7 +35,7 @@ $parser->initUrls();
  */
 
 echo "<pre>";
-var_dump(count($parser->parse()));
+var_dump($parser->parse());
 die();
 
 // foreach($html->find('img') as $element) 
