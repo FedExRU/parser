@@ -1,6 +1,6 @@
 <?php 
 
-final class Parser
+class Parser
 {
 	const MASTER_URL = 'https://hh.ru/search/vacancy';
 
@@ -8,11 +8,18 @@ final class Parser
 
 	private $urls = [];
 
-	protected $currentPage;
-
 	private $firstPageNumber = 0;
 
 	private $lastPageNumber = 0;
+
+	private $curlSourse;
+
+	private $pages;
+
+	public function __construct(\Curl\MultiCurl $sourse)
+	{
+		$this->curlSourse = $sourse;
+	}
 
 	public function initUrls():void
 	{
@@ -46,60 +53,74 @@ final class Parser
 	}
 
 	public function getFirstPage():string
-	{
-		$ch = curl_init(self::MASTER_URL);
-
-		self::buildChannel($ch);
-
-		$html = curl_exec($ch);
-
-		curl_close($ch);
-
-		return $html;
+	{	
+		return array_pop($this->parse([self::MASTER_URL]));
 	}
 
-	public function parse()
+	public function parse($urls = null)
+	{	
+		foreach(is_null($urls) ? $this->urls : $urls as $url){
+			$this->curlSourse->addGet($url);
+		}
+
+		$this->curlSourse->success(function($instance) {
+			$this->pages[] = $instance->response;
+		});
+
+		$this->curlSourse->start();
+
+		return $this->pages;
+
+
+		// $multi = curl_multi_init();
+
+		// $handles = [];
+
+		// $htmls = [];
+
+		// foreach($this->urls as $url){
+
+		// 	$ch = curl_init($url);
+
+		// 	self::buildChannel($ch);
+
+		// 	curl_multi_add_handle($multi, $ch);
+
+		// 	$handles[$url] = $ch;
+		// }
+
+		// self::doCurlMultiExec($multi, $active);
+
+		// while ($active && $mrc == CURLM_OK) {
+			
+		// 	if(curl_multi_select($multi) == -1){
+		// 		usleep(100);
+		// 	}
+
+		// 	self::doCurlMultiExec($multi, $active);
+		// }
+
+		// foreach ($handles as $channel) {
+
+		// 	$html = curl_multi_getcontent($channel);
+
+		// 	$this->currentPage = $html;
+
+		// 	$this->parseSingle();
+
+		// 	array_push($htmls, $html);
+
+		// 	curl_multi_remove_handle($multi, $channel);
+		// }
+
+		// curl_multi_close($multi);
+
+		// return $htmls;
+	}
+
+	public function parseSingle()
 	{
-		$multi = curl_multi_init();
-
-		$handles = [];
-
-		$htmls = [];
-
-		foreach($this->urls as $url){
-
-			$ch = curl_init($url);
-
-			self::buildChannel($ch);
-
-			curl_multi_add_handle($multi, $ch);
-
-			$handles[$url] = $ch;
-		}
-
-		self::doCurlMultiExec($multi, $active);
-
-		while ($active && $mrc == CURLM_OK) {
-			
-			if(curl_multi_select($multi) == -1){
-				usleep(100);
-			}
-
-			self::doCurlMultiExec($multi, $active);
-		}
-
-		foreach ($handles as $channel) {
-			$html = curl_multi_getcontent($channel);
-			
-			$this->currentPage = $html;
-
-			array_push($htmls, $html);
-			curl_multi_remove_handle($multi, $channel);
-		}
-
-		curl_multi_close($multi);
-
-		return $htmls;
+		die('asda');
 	}
 
 	private static function doCurlMultiExec(&$multi, &$active)

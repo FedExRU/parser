@@ -1,8 +1,12 @@
 <?php
 
 require('./Classes/DB.php');
-require('./Classes/Parser.php');
 require('./Classes/HtmlParser.php');
+require('./Classes/Parser.php');
+
+require __DIR__ . '/vendor/autoload.php';
+
+use \Curl\MultiCurl;
 
 $db = DB::getInstance()->getConnection();
 
@@ -10,7 +14,7 @@ $db = DB::getInstance()->getConnection();
  * Initialize classes
  */
 
-$parser = new Parser();
+$parser = new Parser(new MultiCurl());
 
 $htmParser = new HtmlParser('./LIbs//SimpleDom/simple_html_dom.php');
 
@@ -35,7 +39,7 @@ $parser->initUrls();
  */
 
 echo "<pre>";
-var_dump(count($parser->parse()));
+var_dump($parser->parse());
 die();
 
 // foreach($html->find('img') as $element) 
