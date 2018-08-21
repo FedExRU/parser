@@ -1,18 +1,7 @@
 <?php
 
-final class HtmlParser
+final class HtmlParser implements HtmlParserInterface
 {
-	private $libraryPath;
-
-	public function __construct($pathToSimpleDomHtmlLibrary)
-	{
-		$this->libraryPath = $pathToSimpleDomHtmlLibrary;
-
-		include $this->libraryPath;
-
-		$this->validateLibrary();
-	}
-
 	public function getLastPageNumber(string $page):int
 	{
 		$pageNumber = 0;
@@ -30,11 +19,58 @@ final class HtmlParser
 		return $pageNumber;
 	}
 
-	private function validateLibrary():void
+	public function parseVacanciesLinks(string $page):array
 	{
-		if(!class_exists('simple_html_dom_node') && !property_exists('simple_html_dom', 'find'))
-			throw new Exception("It is not simplehtmldom library");	
+		$html = str_get_html($page);
+
+		$links = $html->find('a[data-qa=vacancy-serp__vacancy-title]');
+
+		$urls = [];
+
+		foreach ($links as $link) {
+			array_push($urls, $link->href);
+		}
+
+		return $urls;
 	}
+
+	public function parseVacancyInfo(array $pages):array
+	{	
+		$fullData = [];
+
+		foreach($pages as $page){
+
+			$html = str_get_html($page['content']);
+
+			$data = [
+				'title' => $this->presentText($html->find('[data-qa=vacancy-title]')),
+				'text' => $this->presentText($html->find('div[data-qa=vacancy-description] *')),
+				'address' => $html->find('[data-qa=vacancy-view-raw-address]', 0)->plaintext,
+				'salaryString' => $html->find('[class=vacancy-salary]', 0)->plaintext,
+				'salaryMin' => (int) $html->find('meta[itemprop="minValue"]', 0)->content,
+				'salaryMax' => (int) $html->find('meta[itemprop="maxValue"]', 0)->content,
+				'url' => $page['url'],
+
+			];
+			
+			$fullData[] = $data;
+
+		}
+
+		return $fullData;
+	}
+
+	private function presentText(array $initialText):string
+	{	
+		$text = '';
+
+		foreach ($initialText as $element) {
+			$text .= $element->plaintext.' ';
+		}
+
+		return $text;
+	}
+
 }
 
 ?>

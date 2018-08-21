@@ -1,9 +1,5 @@
 <?php 
 
-require('./Config/Settings.php');
-
-require('./Interfaces/Singleton.php');
-
 final class DB implements Singleton
 {
 	private $connection;
