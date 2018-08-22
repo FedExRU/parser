@@ -18,18 +18,20 @@ abstract class BaseParser implements ParserInterface
 		return $this->pages;
 	}
 
-	public function parsePage(string $url):string
+	public function parsePage(string $url, bool $withCallback = true):string
 	{
-		return array_pop($this->parsePages([$url]));
+		return array_pop($this->parsePages([$url], false, $withCallback));
 	}
 
-	public function parsePages(array $urls, bool $returnUrls = false):array
+	public function parsePages(array $urls, bool $returnUrls = false, bool $withCallback = true):array
 	{	
+		$this->resetPages();
+
 		foreach($urls as $url){
 			$this->curlSourse->addGet($url);
 		}
 
-		$this->curlSourse->success(function($instance) use ($returnUrls) {
+		$this->curlSourse->success(function($instance) use ($returnUrls, $withCallback) {
 			
 			if(!$returnUrls)
 				$content = $instance->response;
@@ -42,7 +44,9 @@ abstract class BaseParser implements ParserInterface
 
 			$this->pages[] = $content;
 
-			$this->successCallback($content);
+			if($withCallback)
+				$this->successCallback($content);
+
 		});
 
 		$this->curlSourse->error(function($instance) {
@@ -53,6 +57,11 @@ abstract class BaseParser implements ParserInterface
 		$this->curlSourse->start();
 
 		return $this->getPages();
+	}
+
+	private function resetPages():void
+	{
+		$this->pages = [];
 	}
 
 	abstract public function successCallback($content, ...$attributes);

@@ -2,15 +2,15 @@
 
 class VacansiesParser implements VacanciesParserInterface
 {
-	private $sourse;
+	private $saver;
 
 	private $parser;
 
 	private $htmlParser;
 
-	public function __construct(PDO $connection, ParserInterface $parser, HtmlParserInterface $htmlParser)
+	public function __construct(VacancySaverInterface $saver, ParserInterface $parser, HtmlParserInterface $htmlParser)
 	{
-		$this->sourse 		= $connection;
+		$this->saver 		= $saver;
 
 		$this->parser 		= $parser;
 
@@ -19,23 +19,25 @@ class VacansiesParser implements VacanciesParserInterface
 
 	public function parseVacancy($content)
 	{
+		$vacanciesPages = null;
+
 		$vacanciesUrl = $this->htmlParser->parseVacanciesLinks($content);
 
 		if(!empty($vacanciesUrl)){
 
-			$vacanciesPages = $this->parser->parsePages($vacanciesUrl, true);
+			$vacanciesPages = $this->parser->parsePages($vacanciesUrl, true, false);
 
 			if(!empty($vacanciesPages)){
+
 				$vacanciesData = $this->htmlParser->parseVacancyInfo($vacanciesPages);
+
+				if(!empty($vacanciesData))
+					$this->saver->save($vacanciesData);
 			}
 
 		}
 
-
-		// 'data-qa="vacancy-description"';
-		echo "<pre>";
-		var_dump($vacanciesData);
-		die();
+		return $vacanciesData;
 		
 	}
 }

@@ -18,7 +18,15 @@ final class DB implements Singleton
 
     	$dsn = $this->getDsn($settings);
 
-    	$this->connection = new PDO($dsn, $settings['user'], $settings['password'], self::$options);
+        try {
+
+            $this->connection = new PDO($dsn, $settings['user'], $settings['password'], self::$options);
+
+        } catch (PDOException $e) {
+
+            die('Подключение не удалось: ' . $e->getMessage());
+            
+        }
     }
 
     private function __clone()    {  } 

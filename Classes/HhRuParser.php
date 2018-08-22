@@ -12,6 +12,8 @@ final class HhRuParser extends BaseParser
 
 	private $urls = [];
 
+	private $vacancies = [];
+
 	private $vacanciesParser;
 
 	public function __construct(\Curl\MultiCurl $sourse, VacanciesParserInterface $vacanciesParser)
@@ -50,7 +52,7 @@ final class HhRuParser extends BaseParser
 
 	public function getFirstPage():string
 	{	
-		return $this->parsePage(self::MASTER_URL);
+		return $this->parsePage(self::MASTER_URL, false);
 	}
 
 	public function getUrls()
@@ -60,6 +62,16 @@ final class HhRuParser extends BaseParser
 
 	public function successCallback($content, ...$attributes)
 	{
-		$this->vacanciesParser->parseVacancy($content);
+		$this->vacancies = array_merge($this->vacancies, $this->vacanciesParser->parseVacancy($content));
+	}
+
+	public function getVacansies($asJson = false)
+	{
+		//return json_encode($this->vacancies, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+		if(!$asJson)
+			return $this->vacancies;
+		else
+			return json_encode($this->vacancies, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 	}
 }

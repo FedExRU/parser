@@ -4,6 +4,8 @@ require('./Interfaces/Singleton.php');
 
 require('./Interfaces/VacanciesParserInterface.php');
 
+require('./Interfaces/VacancySaverInterface.php');
+
 require('./Interfaces/ParserInterface.php');
 
 require('./Interfaces/HtmlParserInterface.php');
@@ -11,6 +13,8 @@ require('./Interfaces/HtmlParserInterface.php');
 require('./Traits/SimpleDomValidator.php');
 
 require('./Classes/BaseParser.php');
+
+require('./Classes/VacancyDbSaver.php');
 
 require('./Classes/Parser.php');
 

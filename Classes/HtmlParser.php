@@ -42,17 +42,19 @@ final class HtmlParser implements HtmlParserInterface
 
 			$html = str_get_html($page['content']);
 
+
 			$data = [
-				'title' => $this->presentText($html->find('[data-qa=vacancy-title]')),
-				'text' => $this->presentText($html->find('div[data-qa=vacancy-description] *')),
+				'title' => htmlspecialchars_decode(stripslashes($this->presentText($html->find('[data-qa=vacancy-title]')))),
+				'text' => htmlspecialchars_decode(stripslashes($this->presentText($html->find('div[data-qa=vacancy-description] *')))),
 				'address' => $html->find('[data-qa=vacancy-view-raw-address]', 0)->plaintext,
 				'salaryString' => $html->find('[class=vacancy-salary]', 0)->plaintext,
 				'salaryMin' => (int) $html->find('meta[itemprop="minValue"]', 0)->content,
 				'salaryMax' => (int) $html->find('meta[itemprop="maxValue"]', 0)->content,
+				'datePosted' => $html->find('meta[itemprop="datePosted"]', 0)->content,
 				'url' => $page['url'],
 
 			];
-			
+
 			$fullData[] = $data;
 
 		}
