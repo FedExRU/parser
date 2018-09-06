@@ -16,8 +16,35 @@ final class VacancyDbSaver implements VacancySaverInterface
 			if(!$this->hasVacancy($vacancy['url']))
 			{	
 				$this->insertVacancy($vacancy);	
-			}	
+			}
+			// else
+			// {
+			// 	$this->updateVacancy($vacancy);
+			// }
 		}
+	}
+
+	private function updateVacancy(array $vacancy):bool
+	{
+		$stmt = $this->sourse->prepare("UPDATE vacancies SET address=:address WHERE url=:url ");
+
+		// $stmt->bindParam(':address', $vacancy['address']);
+		// $stmt->bindParam(':url', $vacancy['url']);
+
+		try {
+
+			$valid = $stmt->execute([
+				'address' => $vacancy['address'],
+				'url' => $vacancy['url'],
+			]);
+
+		} catch (PDOException | Exception $e) {
+
+			echo "DataBase Error: ".$e->getMessage();
+
+		}
+
+		return $valid;
 	}
 
 	private function insertVacancy(array $vacancy):bool

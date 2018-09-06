@@ -4,7 +4,7 @@ interface ParserInterface
 {
 	public function getPages():array;
 
-	public function parsePage(string $url, bool $withCallback = true):string;
+	public function parsePage(string $url, bool $withCallback = true);
 
-	public function parsePages(array $urls, bool $returnUrls = false, bool $withCallback = true):array;
+	public function parsePages(array $urls, bool $returnUrls = false, bool $withCallback = true);
 }

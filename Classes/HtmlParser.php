@@ -1,6 +1,6 @@
 <?php
 
-final class HtmlParser implements HtmlParserInterface
+final class HtmlParser implements MasterParserInterface, HtmlParserInterface
 {
 	public function getLastPageNumber(string $page):int
 	{
@@ -42,18 +42,24 @@ final class HtmlParser implements HtmlParserInterface
 
 			$html = str_get_html($page['content']);
 
+			if(is_a($html, 'simple_html_dom')){
+				$data = [
+					'title' => htmlspecialchars_decode(stripslashes($this->presentText($html->find('[data-qa=vacancy-title]')))),
+					'text' => htmlspecialchars_decode(stripslashes($this->presentText($html->find('div[data-qa=vacancy-description] *')))),
+					'address' => $html->find('[data-qa=vacancy-view-raw-address]', 0)->plaintext,
+					'salaryString' => $html->find('[class=vacancy-salary]', 0)->plaintext,
+					'salaryMin' => (int) $html->find('meta[itemprop="minValue"]', 0)->content,
+					'salaryMax' => (int) $html->find('meta[itemprop="maxValue"]', 0)->content,
+					'datePosted' => $html->find('meta[itemprop="datePosted"]', 0)->content,
+				];
 
-			$data = [
-				'title' => htmlspecialchars_decode(stripslashes($this->presentText($html->find('[data-qa=vacancy-title]')))),
-				'text' => htmlspecialchars_decode(stripslashes($this->presentText($html->find('div[data-qa=vacancy-description] *')))),
-				'address' => $html->find('[data-qa=vacancy-view-raw-address]', 0)->plaintext,
-				'salaryString' => $html->find('[class=vacancy-salary]', 0)->plaintext,
-				'salaryMin' => (int) $html->find('meta[itemprop="minValue"]', 0)->content,
-				'salaryMax' => (int) $html->find('meta[itemprop="maxValue"]', 0)->content,
-				'datePosted' => $html->find('meta[itemprop="datePosted"]', 0)->content,
-				'url' => $page['url'],
-
-			];
+				if(empty($data['address']))
+				{
+					$data['address'] = $html->find('[data-qa=vacancy-company] p', 1)->plaintext;
+				}
+			}
+				
+			$data['url'] = $page['url'];
 
 			$fullData[] = $data;
 

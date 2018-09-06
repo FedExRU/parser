@@ -8,15 +8,25 @@ require('./Interfaces/VacancySaverInterface.php');
 
 require('./Interfaces/ParserInterface.php');
 
+require('./Interfaces/MasterParserInterface.php');
+
 require('./Interfaces/HtmlParserInterface.php');
 
 require('./Traits/SimpleDomValidator.php');
 
 require('./Classes/BaseParser.php');
 
+require('./Classes/TrudVsemParser.php');
+
 require('./Classes/VacancyDbSaver.php');
 
+require('./Classes/JsonVacansiesParser.php');
+
 require('./Classes/Parser.php');
+
+require('./Classes/SuperjobParser.php');
+
+require('./Classes/SuperjobApiParser.php');
 
 require('./Classes/DB.php');
 
